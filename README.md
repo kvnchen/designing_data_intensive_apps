@@ -1,7 +1,20 @@
+## Chapter 1 - Reliable, Scalable, and Maintainable Applications
+
+*Functional Requirements* are what an application should do, such as allowing data to be stored, retrieved, searched, and processed in various ways.
+
+*Nonfunctional Requirements* are general properties like security, reliability, compliance, scalability, compatibility, and maintainability.
+
+*Reliability* means making systems work correctly, even when faults occur. Faults can be in hardware (typically random and uncorrelated), software (bugs are typically systematic and hard to deal with), and humans (who inevitably make mistakes from time to time). Fault tolerance techniques can hide certain types of faults from the end user.
+
+*Scalability* means having strategies for keeping performance good, even when load increases. In order to discuss scalability, we first need ways of describing load and performance quantitatively. Load can be described with numbers called load parameters, such as requests per second to a web server, the ratio of reads to writes in a database, etc. Response time percentiles is a way of measuring performance. In a scalable system, you can add processing capacity in order to remain reliable under high load.
+
+*Maintainability* is in essence about making life better for the engineering and operations teams who need to work with the system. Good abstractions can help reduce complexity and make the system easier to modify and adapt for new use cases. Good operability means having good visibility into the system's health, and having effective ways of managing it.
+
+<br>
 
 ## Chapter 2 - Data Models and Query Languages
 
-Historically, data models started out as one big tree (the hierarchial model), but that wasn't good at representing many-to-many relationships, so the relational model was invented to solve that problem. More recently, developers found that some applications don't fit well into the relational model either. New nonrelational "NoSQL" datastores have diverged into two main directions:
+Historically, data models started out as one big tree (the hierarchical model), but that wasn't good at representing many-to-many relationships, so the relational model was invented to solve that problem. More recently, developers found that some applications don't fit well into the relational model either. New nonrelational "NoSQL" datastores have diverged into two main directions:
 
 1. *Document databases* targets use cases where data comes in self-contained documents and relationships between documents are rare.
 
@@ -56,7 +69,7 @@ Evolvability
 There are several different encoding formats with different compatibility properties:
 
 - Programming language-specific encodings are restricted to a single programming language, and often fail to support forwards and backwards compatibility.
-- Textual formats like JSON, XML and CSV are widespread, and their compatibility depends on how you use them. They have optional schema languages which are sometimes helpful and sometimes a hinderance. These formats are somewhat vague about datatypes, so you have to be careful with things like numbers and binary strings.
+- Textual formats like JSON, XML and CSV are widespread, and their compatibility depends on how you use them. They have optional schema languages which are sometimes helpful and sometimes a hindrance. These formats are somewhat vague about datatypes, so you have to be careful with things like numbers and binary strings.
 - Binary schema-driven formats allow compact, efficient encoding with clearly defined forward and backward compatibility semantics. They can be useful for documentation and code generation in statically typed languages. However, these formats have the downside that data needs to be decoded before it is human readable.
 
 <br>
@@ -65,7 +78,7 @@ There are several modes of dataflow, illustrating different scenarios in which d
 
 - Databases, where the process writing to the database encodes the data and the process reading from the database decodes it
 - RPC and REST APIs, where the client encodes the request, the serve decodes the request and encodes a response, and finally the client decodes the response
-- Asynchronous message passing (using message brokers or actors), where nodes communicate by sending each othe rmessages that are encoded by the sender and decoded by the recipient
+- Asynchronous message passing (using message brokers or actors), where nodes communicate by sending each other messages that are encoded by the sender and decoded by the recipient
 
 <br>
 
@@ -107,7 +120,7 @@ Clients send each write to several nodes, and read from several nodes in paralle
 
 <br>
 
-Single-leader replication is fairly easy to understand and there is no conflict resolution to wrry about. Multi-leader and leaderless replication can be more robust in the presence of network interruptions, faulty nodes, and latency spikes - at the cost of being harder to reason about and providing only very weak consistency guarantees.
+Single-leader replication is fairly easy to understand and there is no conflict resolution to worry about. Multi-leader and leaderless replication can be more robust in the presence of network interruptions, faulty nodes, and latency spikes - at the cost of being harder to reason about and providing only very weak consistency guarantees.
 
 Replication can be synchronous or asynchronous, which has a profound effect on system behavior when there is a fault. Asynchronous replication can be fast when the system is running smoothly, but if a leader fails and you promote an asynchronously updated follower to be the new leader, recently committed data may be lost.
 
@@ -217,18 +230,17 @@ A transaction reads objects that match some search condition. Another client mak
 
 *Literally executing transactions in serial order*
 
-If you can make each stransaction very fast to execute, and the transaction throughput is low enough to process on a single CPU core, this is a simple and effective option.
+If you can make each transaction very fast to execute, and the transaction throughput is low enough to process on a single CPU core, this is a simple and effective option.
 
 <br>
 
 *Two-phase locking*
 
-Two levels of locks, where multiple clients can hold read locks, but no one else can have a lock for a client to obtain to a write lock. Many applications avoid using it because of its performance characteristics.
+Two levels of locks, where multiple clients can hold read locks, but no one else can have a lock for a client to obtain a write lock. Many applications avoid using it because of its performance characteristics.
 
 <br>
 
 *Serializable Snapshot Isolation (SSI)*
 
 Snapshot isolation where transactions are aborted at time of commit if the execution was not serializable. It uses an optimistic approach, allowing transactions to proceed without blocking.
-
 

@@ -347,3 +347,36 @@ There are several join algorithms for MapReduce that are also internally used in
 Distributed batch processing engines have a deliberately restricted programming model: callback functions are assumed to be stateless and to have no externally visible side effects besides their designated output. This restriction allows the framework to hide some of the hard distributed systems problems behind its abstraction: in the face of crashes and network issues, tasks can be retried safely, and the output from any failed tasks is discarded. If several tasks for a partition succeed, only one of them actually makes its output visible.
 
 The distinguishing feature of a batch processing job is that it reads some input data and produces some output data, without modifying the input - in other words, the input is derived from the output. Crucially, the input data is *bounded*: it has a known, fixed size (for example, it consists of a set of log files at some point in time, or a snapshot of a database's contents). Because it is bounded, a job knows when it has finished reading the entire input, and so a job eventually completes when it is done.
+
+<br>
+
+## Chapter 11 - Stream Processing
+
+*AMQP/JMS-style message broker*
+- The broker assigns individual messages to consumers, and consumers acknowledge individual messages when they have been successfully processed. This approach is appropriate as an asynchronous form of RPC, for example in a task queue, where the exact order of message processing is not important and where there is no need to go back and read old messages again after they have been processed.
+
+*Log-based message broker*
+- The broker assigns all messages in a partition to the same consumer node, and always delivers messages in the same order. Parallelism is achieved through partitioning, and consumers track their progress by checkpointing the offset of the last message they have processed. The broker retains messages on disk, so it is possible to jump back and reread old messages if necessary.
+
+The log-based approach has similarities to the replication logs found in databases and log-structured storage engines. This approach is especially appropriate for stream processing systems that consume input streams and generate derived state or derived output streams.
+
+Streams can come from user activity events, sensors providing periodic readings, and data feeds like market data in finance. It can also be useful to think of writes to a database as a stream: the changelog - the history of all changes made to a database - can be captured implicitly through change data capture or explicitly through event sourcing. Log compaction allows the stream to retain a full copy of the contents of a database.
+
+Representing databases as streams allows you to keep derived data systems like search indexes, caches, and analytics systems continually up to date by consuming the log of changes and applying them to the derived system. You can even build new views onto existing data by starting from scratch and consuming the log of changes from the beginning all the way to the present.
+
+The facilities for maintaining state as streams and replaying messages are also the basis for the techniques that enable stream joins and fault tolerance in various stream processing frameworks.
+
+There are three types of joins that may appear in stream processes:
+
+*Stream-stream joins*
+- Both input streams consist of activity events, and the join operator searches for related events that occur within some window of time. For example, it may match two actions taken by the same user within 30 minutes of each other.
+
+*Stream-table joins*
+- One input stream consists of activity events, while the other is a database changelog. The changelog keeps a local copy of the database up to date. For each activity event, the join operator queries the database and outputs an enriched activity event.
+
+*Table-table joins*
+- Both input streams are database changelogs. In this case, every change on one side is joined with the latest state of the other side. The result is a stream of changes to the materialized view of the join between the two tables.
+
+As with batch processing, we need to discard the partial output of any failed tasks. But, since a stream is long-running and produces output continuously, we can't simply discard all output. Instead, a finer-grained recovery mechanism can be used, based on microbatching, checkpointing, transactions, or idempotent writes.
+
+<br>

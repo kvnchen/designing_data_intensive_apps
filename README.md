@@ -346,7 +346,7 @@ There are several join algorithms for MapReduce that are also internally used in
 
 Distributed batch processing engines have a deliberately restricted programming model: callback functions are assumed to be stateless and to have no externally visible side effects besides their designated output. This restriction allows the framework to hide some of the hard distributed systems problems behind its abstraction: in the face of crashes and network issues, tasks can be retried safely, and the output from any failed tasks is discarded. If several tasks for a partition succeed, only one of them actually makes its output visible.
 
-The distinguishing feature of a batch processing job is that it reads some input data and produces some output data, without modifying the input - in other words, the input is derived from the output. Crucially, the input data is *bounded*: it has a known, fixed size (for example, it consists of a set of log files at some point in time, or a snapshot of a database's contents). Because it is bounded, a job knows when it has finished reading the entire input, and so a job eventually completes when it is done.
+The distinguishing feature of a batch processing job is that it reads some input data and produces some output data, without modifying the input - in other words, the output is derived from the input. Crucially, the input data is *bounded*: it has a known, fixed size (for example, it consists of a set of log files at some point in time, or a snapshot of a database's contents). Because it is bounded, a job knows when it has finished reading the entire input, and so a job eventually completes when it is done.
 
 <br>
 
